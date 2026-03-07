@@ -1,11 +1,33 @@
 services:
 
-  base-service:
+  postgres:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+      POSTGRES_DB: auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+
+  auth-service:
     build:
       context: .
-      dockerfile: services/base-service/Dockerfile
-    container_name: base-service
+      dockerfile: services/auth-service/Dockerfile
+    container_name: auth-service
     environment:
       PORT: 3000
+      DB_HOST: postgres
+      DB_USER: auth_user
+      DB_PASS: auth_password
+      DB_NAME: auth_db
+      JWT_SECRET: auth_super_secret
     ports:
       - "3001:3000"
+    depends_on:
+      - postgres
+
+volumes:
+  auth_postgres_data:
