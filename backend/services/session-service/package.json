@@ -1,5 +1,5 @@
 {
-  "name": "base-service",
+  "name": "session-service",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
