@@ -1,18 +1,19 @@
 import http from "k6/http";
 
 export const options = {
-  vus: 1000,
-  duration: "30s"
+  vus: 5000,
+  duration: "20s"
 };
 
 export default function () {
 
+  const payload = JSON.stringify({
+    sessionId: "test-session"
+  });
+
   http.post(
-    "http://localhost:3002/session/create",
-    JSON.stringify({
-      userId: "user1",
-      deviceType: "WEB"
-    }),
+    "http://localhost:3002/session/heartbeat",
+    payload,
     { headers: { "Content-Type": "application/json" } }
   );
 
