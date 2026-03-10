@@ -6,21 +6,24 @@ import { GetActiveSessionsUseCase } from "../application/GetActiveSessionsUseCas
 
 export class SessionFactory {
 
+  private static instance: any;
+
   static build() {
 
-    const repo = new RedisSessionRepository();
+    if (!this.instance) {
 
-    return {
+      const repo = new RedisSessionRepository();
 
-      createSession: new CreateSessionUseCase(repo),
+      this.instance = {
+        createSession: new CreateSessionUseCase(repo),
+        heartbeat: new HeartbeatUseCase(repo),
+        logout: new LogoutSessionUseCase(repo),
+        getActive: new GetActiveSessionsUseCase(repo)
+      };
 
-      heartbeat: new HeartbeatUseCase(repo),
+    }
 
-      logout: new LogoutSessionUseCase(repo),
-
-      getActive: new GetActiveSessionsUseCase(repo)
-
-    };
+    return this.instance;
 
   }
 
