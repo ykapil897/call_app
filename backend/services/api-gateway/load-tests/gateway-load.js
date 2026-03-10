@@ -7,7 +7,7 @@ export const options = {
 
 export default function () {
 
-  http.get("http://localhost:3000/session/active?userId=user1", {
+  http.get("http://localhost:3002/session/active?userId=user1", {
     headers: {
       Authorization: "Bearer TOKEN"
     }

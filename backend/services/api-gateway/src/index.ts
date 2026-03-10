@@ -12,7 +12,7 @@ async function start() {
       host: serverConfig.host
     });
 
-    app.log.info(`API Gateway running on port ${serverConfig.port}`);
+    console.log(`API Gateway running on port ${serverConfig.port}`);
 
   } catch (err) {
 
