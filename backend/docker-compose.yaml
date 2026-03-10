@@ -28,6 +28,25 @@ services:
       - "3001:3000"
     depends_on:
       - postgres
+    
+  redis:
+    image: redis:7
+    container_name: session-redis
+    ports:
+      - "6379:6379"
+
+  session-service:
+    build:
+      context: .
+      dockerfile: services/session-service/Dockerfile
+    container_name: session-service
+    environment:
+      PORT: 3000
+      REDIS_HOST: redis
+    ports:
+      - "3002:3000"
+    depends_on:
+      - redis
 
 volumes:
   auth_postgres_data:

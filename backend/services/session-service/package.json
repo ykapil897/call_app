@@ -8,7 +8,8 @@
   "dependencies": {
     "fastify": "4.26.2",
     "pino": "8.17.2",
-    "prom-client": "14.2.0"
+    "prom-client": "14.2.0",
+    "redis": "4.6.13"
   },
   "devDependencies": {
     "typescript": "5.4.5",
