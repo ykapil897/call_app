@@ -1,18 +1,21 @@
 {
-  "name": "base-service",
+  "name": "api-gateway",
   "version": "1.0.0",
-  "main": "dist/index.js",
   "scripts": {
     "start": "ts-node src/index.ts"
   },
   "dependencies": {
     "fastify": "4.26.2",
-    "pino": "8.17.2",
-    "prom-client": "14.2.0"
+    "@fastify/http-proxy": "9.5.0",
+    "jsonwebtoken": "9.0.2",
+    "redis": "4.6.13",
+    "prom-client": "14.2.0",
+    "pino": "8.17.2"
   },
   "devDependencies": {
     "typescript": "5.4.5",
     "ts-node": "10.9.2",
+    "@types/jsonwebtoken": "9.0.6",
     "@types/node": "20.11.30"
   }
 }

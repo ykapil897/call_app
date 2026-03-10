@@ -3,7 +3,7 @@ import { serverConfig } from "./config/server";
 
 async function start() {
 
-  const app = buildApp();
+  const app = await buildApp();
 
   try {
 
@@ -12,7 +12,7 @@ async function start() {
       host: serverConfig.host
     });
 
-    console.log(`Server running on port ${serverConfig.port}`);
+    app.log.info(`API Gateway running on port ${serverConfig.port}`);
 
   } catch (err) {
 
