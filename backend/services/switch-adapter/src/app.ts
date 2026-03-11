@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import { healthRoute } from "./health/health.route";
 import { metricsRoute } from "./metrics/metrics.route";
+import { switchRoutes } from "./routes/switch.routes";  
 
 export function buildApp() {
 
@@ -12,6 +13,7 @@ export function buildApp() {
 
   healthRoute(app);
   metricsRoute(app);
+  switchRoutes(app);
 
   return app;
 }
