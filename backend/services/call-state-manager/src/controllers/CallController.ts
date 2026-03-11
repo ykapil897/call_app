@@ -37,7 +37,10 @@ export class CallController {
 
     return {
       success: true,
-      data: { callId: call.callId, state: call.state },
+      data: { 
+        callId: call.callId, 
+        state: call.state 
+     },
       meta: { serverTime: Date.now() }
     };
 
