@@ -1,12 +1,8 @@
 import Fastify from "fastify";
 import { healthRoute } from "./health/health.route";
 import { metricsRoute } from "./metrics/metrics.route";
-import { callRoutes } from "./routes/call.routes";
-import { connectRedis } from "./infrastructure/RedisClient";
 
-export async function buildApp() {
-
-  await connectRedis();
+export function buildApp() {
 
   const app = Fastify({
     logger: {
@@ -16,7 +12,6 @@ export async function buildApp() {
 
   healthRoute(app);
   metricsRoute(app);
-  callRoutes(app);
 
   return app;
 }

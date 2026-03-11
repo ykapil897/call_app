@@ -3,7 +3,7 @@ import { serverConfig } from "./config/server";
 
 async function start() {
 
-  const app = await buildApp();
+  const app = buildApp();
 
   try {
 
