@@ -62,5 +62,18 @@ services:
     depends_on:
       - redis
 
+  call-state-manager:
+    build: 
+      context: .
+      dockerfile: services/call-state-manager/Dockerfile
+    container_name: call-state-manager
+    environment:
+      PORT: 3000
+      REDIS_HOST: redis
+    ports:
+      - "3003:3000"
+    depends_on:
+      - redis
+
 volumes:
   auth_postgres_data:
