@@ -91,7 +91,6 @@ services:
   freeswitch:
     image: safarov/freeswitch:latest
     container_name: freeswitch
-    network_mode: bridge
     ports:
       - "5060:5060/udp"
       - "5060:5060/tcp"
@@ -101,7 +100,7 @@ services:
       SOUND_RATES: "8000:16000"
       SOUND_TYPES: "music:en-us-callie"
     volumes:
-      - ./freeswitch/conf:/etc/freeswitch
+      - ./freeswitch/conf/vanilla:/etc/freeswitch
       - freeswitch_sounds:/usr/share/freeswitch/sounds
     tty: true
     restart: unless-stopped
