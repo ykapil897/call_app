@@ -1,6 +1,8 @@
+version: "3.9"
+
 services:
 
-  postgres:
+  auth-postgres:
     image: postgres:15
     container_name: auth-db
     environment:
@@ -19,7 +21,7 @@ services:
     container_name: auth-service
     environment:
       PORT: 3000
-      DB_HOST: postgres
+      DB_HOST: auth-postgres
       DB_USER: auth_user
       DB_PASS: auth_password
       DB_NAME: auth_db
@@ -27,13 +29,15 @@ services:
     ports:
       - "3001:3000"
     depends_on:
-      - postgres
-    
+      - auth-postgres
+
+
   redis:
     image: redis:7
     container_name: session-redis
     ports:
       - "6379:6379"
+
 
   session-service:
     build:
@@ -48,6 +52,7 @@ services:
     depends_on:
       - redis
 
+
   api-gateway:
     build:
       context: .
@@ -55,15 +60,19 @@ services:
     container_name: api-gateway
     environment:
       PORT: 3000
-      JWT_SECRET: supersecret
+      JWT_SECRET: auth_super_secret
       REDIS_HOST: redis
     ports:
       - "3000:3000"
     depends_on:
-      - redis
+      - auth-service
+      - session-service
+      - call-state-manager
+      - billing-service
+
 
   call-state-manager:
-    build: 
+    build:
       context: .
       dockerfile: services/call-state-manager/Dockerfile
     container_name: call-state-manager
@@ -75,8 +84,9 @@ services:
     depends_on:
       - redis
 
+
   switch-adapter:
-    build: 
+    build:
       context: .
       dockerfile: services/switch-adapter/Dockerfile
     container_name: switch-adapter
@@ -88,6 +98,7 @@ services:
     depends_on:
       - freeswitch
 
+
   freeswitch:
     image: safarov/freeswitch:latest
     container_name: freeswitch
@@ -95,15 +106,73 @@ services:
       - "5060:5060/udp"
       - "5060:5060/tcp"
       - "8021:8021"
-      - "17000-17999:17000-17999/udp"
-    environment:
-      SOUND_RATES: "8000:16000"
-      SOUND_TYPES: "music:en-us-callie"
+      - "16384-32768:16384-32768/udp"
     volumes:
       - ./freeswitch/conf/vanilla:/etc/freeswitch
       - freeswitch_sounds:/usr/share/freeswitch/sounds
     tty: true
     restart: unless-stopped
+
+
+  billing-postgres:
+    image: postgres:15
+    container_name: billing-db
+    environment:
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_password
+      POSTGRES_DB: billing_db
+    ports:
+      - "5433:5432"
+
+
+  billing-service:
+    build:
+      context: .
+      dockerfile: services/billing-service/Dockerfile
+    container_name: billing-service
+    environment:
+      PORT: 3000
+      DB_HOST: billing-postgres
+      DB_USER: billing_user
+      DB_PASS: billing_password
+      DB_NAME: billing_db
+    ports:
+      - "3005:3000"
+    depends_on:
+      - billing-postgres
+
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  event-bus:
+    build:
+      context: .
+      dockerfile: services/event-bus/Dockerfile
+    container_name: event-bus
+    environment:
+      KAFKA_BROKER: kafka:9092
+    depends_on:
+      - kafka
 
 volumes:
   auth_postgres_data:
