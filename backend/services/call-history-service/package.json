@@ -1,0 +1,22 @@
+{
+  "name": "call-history-service",
+  "version": "1.0.0",
+  "description": "Call history storage service",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "fastify": "4.26.2",
+    "pino": "8.17.2",
+    "prom-client": "14.2.0",
+    "kafkajs": "2.2.4",
+    "pg": "8.11.5"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5",
+    "ts-node": "10.9.2",
+    "@types/node": "20.11.30",
+    "@types/pg": "8.11.5"
+  }
+}
