@@ -35,6 +35,8 @@ services:
     container_name: session-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 
   session-service:
@@ -121,6 +123,8 @@ services:
       POSTGRES_DB: billing_db
     ports:
       - "5433:5432"
+    volumes:
+      - billing_postgres_data:/var/lib/postgresql/data
 
 
   billing-service:
@@ -181,6 +185,8 @@ services:
       POSTGRES_DB: history_db
     ports:
       - "5434:5432"
+    volumes:
+      - history_postgres_data:/var/lib/postgresql/data
 
   call-history-service:
     build: 
@@ -200,4 +206,6 @@ services:
 volumes:
   auth_postgres_data:
   freeswitch_sounds:
-  
+  billing_postgres_data:
+  history_postgres_data:
+  redis_data:

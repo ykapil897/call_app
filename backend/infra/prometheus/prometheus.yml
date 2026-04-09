@@ -4,6 +4,12 @@ global:
 scrape_configs:
   - job_name: "backend"
 
-    static_configs:
-      - targets:
-          - "base-service:3000"
+    scrape_configs:
+      - job_name: "services"
+        static_configs:
+          - targets:
+              - auth-service:3000
+              - session-service:3000
+              - api-gateway:3000
+              - call-state-manager:3000
+              - billing-service:3000
