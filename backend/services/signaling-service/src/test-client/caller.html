@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Caller</title>
+</head>
+<body>
+
+<h2>Caller</h2>
+
+<button onclick="callUser()">
+  Call User2
+</button>
+
+<audio id="remoteAudio" autoplay></audio>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+<script>
+
+const socket = io(
+  "http://localhost:3010",
+  {
+    query: {
+      userId: "user1"
+    }
+  }
+);
+
+const remoteAudio =
+  document.getElementById(
+    "remoteAudio"
+  );
+
+const pc =
+  new RTCPeerConnection({
+
+    iceServers: [
+      {
+        urls:
+          "stun:stun.l.google.com:19302"
+      }
+    ]
+
+  });
+
+navigator.mediaDevices
+  .getUserMedia({
+    audio: true
+  })
+  .then(stream => {
+
+    stream
+      .getTracks()
+      .forEach(track => {
+
+        pc.addTrack(
+          track,
+          stream
+        );
+
+      });
+
+  });
+
+pc.ontrack = (event) => {
+
+  remoteAudio.srcObject =
+    event.streams[0];
+
+};
+
+pc.onicecandidate =
+  (event) => {
+
+    if (event.candidate) {
+
+      socket.emit(
+        "ICE_CANDIDATE",
+        {
+          targetUserId: "user2",
+          candidate: event.candidate
+        }
+      );
+
+    }
+
+  };
+
+socket.on(
+  "CALL_ACCEPTED",
+  async () => {
+
+    const offer =
+      await pc.createOffer();
+
+    await pc.setLocalDescription(
+      offer
+    );
+
+    socket.emit(
+      "WEBRTC_OFFER",
+      {
+        calleeId: "user2",
+        offer
+      }
+    );
+
+  }
+);
+
+socket.on(
+  "WEBRTC_ANSWER",
+  async (data) => {
+
+    await pc.setRemoteDescription(
+      data.answer
+    );
+
+  }
+);
+
+socket.on(
+  "ICE_CANDIDATE",
+  async (data) => {
+
+    try {
+
+      await pc.addIceCandidate(
+        data.candidate
+      );
+
+    } catch {}
+
+  }
+);
+
+async function callUser() {
+
+  socket.emit(
+    "CALL_USER",
+    {
+      calleeId: "user2"
+    }
+  );
+
+}
+
+</script>
+
+</body>
+</html>

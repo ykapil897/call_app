@@ -1,0 +1,13 @@
+export enum CallState {
+
+  INITIATED = "INITIATED",
+
+  RINGING = "RINGING",
+
+  ACCEPTED = "ACCEPTED",
+
+  REJECTED = "REJECTED",
+
+  ENDED = "ENDED"
+
+}

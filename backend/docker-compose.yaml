@@ -30,7 +30,7 @@ services:
       - auth-postgres
 
 
-  redis:
+  redis-session:
     image: redis:7
     container_name: session-redis
     ports:
@@ -85,33 +85,31 @@ services:
       - redis
 
 
-  switch-adapter:
+  redis-signaling:
+    image: redis:7
+
+    container_name: signaling-redis
+
+    ports:
+      - "6379:6379"
+
+
+  signaling-service:
     build:
       context: .
-      dockerfile: services/switch-adapter/Dockerfile
-    container_name: switch-adapter
+      dockerfile: services/signaling-service/Dockerfile
+
+    container_name: signaling-service
+
     environment:
-      PORT: 3000
-      FS_HOST: freeswitch
+      PORT: 3010
+      REDIS_HOST: redis
+
     ports:
-      - "3004:3000"
+      - "3010:3010"
+
     depends_on:
-      - freeswitch
-
-
-  freeswitch:
-    image: safarov/freeswitch:latest
-    container_name: freeswitch
-    ports:
-      - "5060:5060/udp"
-      - "5060:5060/tcp"
-      - "8021:8021"
-      - "16384-32768:16384-32768/udp"
-    volumes:
-      - ./freeswitch/conf/vanilla:/etc/freeswitch
-      - freeswitch_sounds:/usr/share/freeswitch/sounds
-    tty: true
-    restart: unless-stopped
+      - redis
 
 
   billing-postgres:
