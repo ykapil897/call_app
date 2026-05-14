@@ -1,8 +1,16 @@
+import {
+  Request,
+  Response
+} from "express";
+
 export class SignalingController {
 
-  static async status() {
+  static async status(
+    _req: Request,
+    res: Response
+  ) {
 
-    return {
+    res.send({
       success: true,
       data: {
         service: "signaling-service"
@@ -10,7 +18,7 @@ export class SignalingController {
       meta: {
         serverTime: Date.now()
       }
-    };
+    });
 
   }
 

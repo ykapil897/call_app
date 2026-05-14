@@ -1,5 +1,5 @@
-import { FastifyInstance }
-  from "fastify";
+import { AppInstance }
+  from "../types/express";
 
 import client from "prom-client";
 
@@ -8,23 +8,27 @@ if (
     "process_cpu_user_seconds_total"
   )
 ) {
+
   client.collectDefaultMetrics();
+
 }
 
-export async function metricsRoute(
-  app: FastifyInstance
+export function metricsRoute(
+  app: AppInstance
 ) {
 
   app.get(
     "/metrics",
-    async (_req, reply) => {
+    async (_req, res) => {
 
-      reply.header(
+      res.setHeader(
         "Content-Type",
         client.register.contentType
       );
 
-      return client.register.metrics();
+      res.end(
+        await client.register.metrics()
+      );
 
     }
   );

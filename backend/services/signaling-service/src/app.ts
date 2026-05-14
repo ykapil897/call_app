@@ -1,25 +1,32 @@
-import Fastify from "fastify";
-import cors from "@fastify/cors";
+import express from "express";
 
-import { healthRoute } from "./health/health.route";
-import { metricsRoute } from "./metrics/metrics.route";
-import { signalingRoutes } from "./routes/signaling.routes";
+import cors from "cors";
 
-import { connectRedis } from "./infrastructure/RedisClient";
+import {
+  healthRoute
+} from "./health/health.route";
+
+import {
+  metricsRoute
+} from "./metrics/metrics.route";
+
+import {
+  signalingRoutes
+} from "./routes/signaling.routes";
+
+import {
+  connectRedis
+} from "./infrastructure/RedisClient";
 
 export async function buildApp() {
 
   await connectRedis();
 
-  const app = Fastify({
-    logger: {
-      level: "info"
-    }
-  });
+  const app = express();
 
-  await app.register(cors, {
-    origin: true
-  });
+  app.use(cors());
+
+  app.use(express.json());
 
   healthRoute(app);
 

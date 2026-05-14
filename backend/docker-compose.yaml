@@ -30,7 +30,7 @@ services:
       - auth-postgres
 
 
-  redis-session:
+  redis:
     image: redis:7
     container_name: session-redis
     ports:
@@ -102,14 +102,14 @@ services:
     container_name: signaling-service
 
     environment:
-      PORT: 3010
-      REDIS_HOST: redis
+      PORT: 3000
+      REDIS_HOST: redis-signaling
 
     ports:
-      - "3010:3010"
+      - "3007:3000"
 
     depends_on:
-      - redis
+      - redis-signaling
 
 
   billing-postgres:

@@ -1,11 +1,12 @@
-import { FastifyInstance }
-  from "fastify";
+import { AppInstance }
+  from "../types/express";
 
-import { SignalingController }
-  from "../controllers/SignalingController";
+import {
+  SignalingController
+} from "../controllers/SignalingController";
 
-export async function signalingRoutes(
-  app: FastifyInstance
+export function signalingRoutes(
+  app: AppInstance
 ) {
 
   app.get(

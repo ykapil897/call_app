@@ -1,17 +1,17 @@
-import { FastifyInstance }
-  from "fastify";
+import { AppInstance }
+  from "../types/express";
 
-export async function healthRoute(
-  app: FastifyInstance
+export function healthRoute(
+  app: AppInstance
 ) {
 
   app.get(
     "/health",
-    async () => {
+    async (_req, res) => {
 
-      return {
+      res.send({
         status: "UP"
-      };
+      });
 
     }
   );

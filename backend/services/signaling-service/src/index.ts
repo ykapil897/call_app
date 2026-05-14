@@ -1,9 +1,16 @@
-import { Server } from "socket.io";
+import { createServer }
+  from "http";
 
-import { buildApp } from "./app";
+import { Server }
+  from "socket.io";
 
-import { serverConfig }
-  from "./config/server";
+import {
+  buildApp
+} from "./app";
+
+import {
+  serverConfig
+} from "./config/server";
 
 import {
   registerSignalingGateway
@@ -11,37 +18,39 @@ import {
 
 async function start() {
 
-  const app = await buildApp();
+  const app =
+    await buildApp();
 
-  try {
+  const httpServer =
+    createServer(app);
 
-    const io = new Server(
-      app.server,
+  const io =
+    new Server(
+      httpServer,
       {
         cors: {
-          origin: "*"
+          origin: "*",
+          methods: [
+            "GET",
+            "POST"
+          ]
         }
       }
     );
 
-    registerSignalingGateway(io);
+  registerSignalingGateway(io);
 
-    await app.listen({
-      port: serverConfig.port,
-      host: serverConfig.host
-    });
+  httpServer.listen(
+    serverConfig.port,
+    serverConfig.host,
+    () => {
 
-    console.log(
-      `Server running on port ${serverConfig.port}`
-    );
+      console.log(
+        `Server running on port ${serverConfig.port}`
+      );
 
-  } catch (err) {
-
-    console.error(err);
-
-    process.exit(1);
-
-  }
+    }
+  );
 
 }
 
