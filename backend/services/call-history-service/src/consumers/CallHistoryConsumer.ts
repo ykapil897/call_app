@@ -1,47 +1,155 @@
-import { Kafka } from "kafkajs"
-import { PostgresHistoryRepository } from "../infrastructure/PostgresHistoryRepository"
-import { CallRecord } from "../domain/CallRecord"
+import { Kafka }
+  from "kafkajs";
 
-const kafka = new Kafka({
-  brokers: ["kafka:9092"]
-})
+import {
+  PostgresHistoryRepository
+} from "../infrastructure/PostgresHistoryRepository";
 
-export async function startHistoryConsumer() {
+import {
+  CallRecord
+} from "../domain/CallRecord";
 
-  const consumer = kafka.consumer({
-    groupId: "history-service"
-  })
+const kafka =
+  new Kafka({
 
-  await consumer.connect()
+    clientId: "history-service",
+
+    brokers: [
+      process.env.KAFKA_BROKER || "kafka:9092"
+    ]
+
+  });
+
+const consumer =
+  kafka.consumer({
+    groupId: "history-group"
+  });
+
+export async function
+startHistoryConsumer() {
+
+  await consumer.connect();
 
   await consumer.subscribe({
-    topic: "call_events"
-  })
 
-  const repo = new PostgresHistoryRepository()
+    topic: "call_events"
+
+  });
+
+  const repo =
+    new PostgresHistoryRepository();
 
   await consumer.run({
 
-    eachMessage: async ({ message }) => {
+    eachMessage:
+      async ({ message }) => {
 
-      const data = JSON.parse(message.value!.toString())
+        const data =
+          JSON.parse(
+            message.value!.toString()
+          );
 
-      if (data.event === "CALL_ENDED") {
+        switch (data.event) {
 
-        const record = new CallRecord(
-          data.callId,
-          data.callerId,
-          data.calleeId,
-          data.duration,
-          data.timestamp
-        )
+          case "CALL_CREATED":
 
-        await repo.save(record)
+            await repo.create(
+
+              new CallRecord(
+
+                data.callId,
+
+                data.callerId,
+
+                data.calleeId,
+
+                "CREATED",
+
+                data.timestamp,
+
+                null,
+
+                null,
+
+                0
+
+              )
+
+            );
+
+            break;
+
+          case "CALL_ANSWERED":
+
+            await repo.updateStatus(
+
+              data.callId,
+
+              "ANSWERED",
+
+              {
+                answeredAt:
+                  data.timestamp
+              }
+
+            );
+
+            break;
+
+          case "CALL_REJECTED":
+
+            await repo.updateStatus(
+
+              data.callId,
+
+              "REJECTED",
+
+              {}
+
+            );
+
+            break;
+
+          case "CALL_MISSED":
+
+            await repo.updateStatus(
+
+              data.callId,
+
+              "MISSED",
+
+              {}
+
+            );
+
+            break;
+
+          case "CALL_ENDED":
+
+            await repo.updateStatus(
+
+              data.callId,
+
+              "ENDED",
+
+              {
+
+                endedAt:
+                  data.timestamp,
+
+                duration:
+                  data.duration
+
+              }
+
+            );
+
+            break;
+
+        }
 
       }
 
-    }
-
-  })
+  });
 
 }

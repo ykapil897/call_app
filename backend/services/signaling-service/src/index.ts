@@ -8,6 +8,9 @@ import {
   buildApp
 } from "./app";
 
+import { producer }
+  from "./infrastructure/kafka.client";
+
 import {
   serverConfig
 } from "./config/server";
@@ -39,6 +42,8 @@ async function start() {
     );
 
   registerSignalingGateway(io);
+
+  await producer.connect();
 
   httpServer.listen(
     serverConfig.port,

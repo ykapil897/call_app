@@ -8,4 +8,8 @@ export interface BillingRepository {
 
   invoiceExists(callId: string): Promise<boolean>
 
+  getBalance(userId: string): Promise<number>;
+
+  getInvoiceByCallId(callId: string): Promise<any>;
+
 }

@@ -37,4 +37,18 @@ export class PresenceService {
 
   }
 
+  async getOnlineUsers() {
+
+    return this.repo.getOnlineUsers();
+
+  }
+
+  async isOnline(userId: string) {
+
+    return this.repo.isOnline(
+      userId
+    );
+
+  }
+  
 }

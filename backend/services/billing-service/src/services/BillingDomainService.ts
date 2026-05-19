@@ -26,4 +26,16 @@ export class BillingDomainService {
 
   }
 
+  async getBalance(userId: string) {
+
+    return this.repo.getBalance(userId);
+
+  }
+
+  async getInvoice(callId: string) {
+
+    return this.repo.getInvoiceByCallId(callId);
+
+  }
+
 }

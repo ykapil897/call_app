@@ -50,4 +50,46 @@ export class AuthController {
 
   }
 
+  static async getUser(
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) {
+
+    const { email } =
+      req.query as any;
+
+    const useCase =
+      AuthFactory.createGetUserByEmailUseCase();
+
+    try {
+
+      const user =
+        await useCase.execute(email);
+
+      return {
+        success: true,
+        data: user,
+        meta: {
+          serverTime: Date.now()
+        }
+      };
+
+    } catch {
+
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: "USER_NOT_FOUND",
+          message: "User not found",
+          retryable: false
+        },
+        meta: {
+          serverTime: Date.now()
+        }
+      });
+
+    }
+
+  }
+
 }

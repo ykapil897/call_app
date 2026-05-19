@@ -14,4 +14,14 @@ export function signalingRoutes(
     SignalingController.status
   );
 
+  app.get(
+    "/signaling/online-users",
+    SignalingController.onlineUsers
+  );
+
+  app.get(
+    "/signaling/presence",
+    SignalingController.presence
+  );
+
 }

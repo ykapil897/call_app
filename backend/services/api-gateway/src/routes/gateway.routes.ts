@@ -38,4 +38,10 @@ export async function gatewayRoutes(app: FastifyInstance) {
     preHandler: jwtMiddleware
   });
 
+    app.register(proxy, {
+    upstream: services.signaling,
+    prefix: "/signaling",
+    preHandler: jwtMiddleware
+  });
+
 }

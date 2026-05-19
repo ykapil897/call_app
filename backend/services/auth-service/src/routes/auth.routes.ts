@@ -11,4 +11,5 @@ export async function authRoutes(app: FastifyInstance) {
     meta: { serverTime: Date.now() }
   }));
 
+  app.get("/auth/user", AuthController.getUser);
 }

@@ -5,6 +5,8 @@ export interface PresenceRepository {
     socketId: string
   ): Promise<void>;
 
+  refresh(userId: string): Promise<void>;
+
   remove(
     userId: string
   ): Promise<void>;
@@ -13,4 +15,7 @@ export interface PresenceRepository {
     userId: string
   ): Promise<string | null>;
 
+  getOnlineUsers(): Promise<string[]>;
+
+  isOnline(userId: string): Promise<boolean>;
 }

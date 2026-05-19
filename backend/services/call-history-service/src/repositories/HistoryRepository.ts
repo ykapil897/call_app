@@ -1,13 +1,27 @@
-import { CallRecord } from "../domain/CallRecord"
+import { CallRecord }
+  from "../domain/CallRecord";
 
 export interface HistoryRepository {
 
-  save(record: CallRecord): Promise<void>
+  create(
+    record: CallRecord
+  ): Promise<void>;
+
+  updateStatus(
+    callId: string,
+
+    status: string,
+
+    updates: any
+  ): Promise<void>;
 
   fetchHistory(
     userId: string,
+
     cursor: string | null,
+
     limit: number
-  ): Promise<any[]>
+
+  ): Promise<any[]>;
 
 }

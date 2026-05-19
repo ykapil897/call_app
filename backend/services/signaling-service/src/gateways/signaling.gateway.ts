@@ -1,95 +1,219 @@
-import {
-  Server,
-  Socket
-} from "socket.io";
+import { Server }
+  from "socket.io";
 
-import {
-  SIGNALING_EVENTS
-} from "../events/signaling.events";
-
-import {
-  CallService
-} from "../services/CallService";
-
-import {
-  PresenceService
-} from "../services/PresenceService";
+import { v4 as uuid }
+  from "uuid";
 
 import {
   RedisPresenceRepository
 } from "../repositories/RedisPresenceRepository";
 
 import {
-  socketRegistry
-} from "../infrastructure/SocketRegistry";
+  ActiveCallStore
+} from "../stores/ActiveCallStore";
 
-const callService =
-  new CallService();
+import {
+  CallEventProducer
+} from "../events/CallEventProducer";
 
-const presenceService =
-  new PresenceService(
-    new RedisPresenceRepository()
-  );
+import {
+  CallEventType
+} from "../config/events";
 
-export function registerSignalingGateway(
+const presenceRepo =
+  new RedisPresenceRepository();
+
+const callStore =
+  new ActiveCallStore();
+
+const producer =
+  new CallEventProducer();
+
+export function
+registerSignalingGateway(
   io: Server
 ) {
 
   io.on(
     "connection",
-    async (socket: Socket) => {
+    async (socket) => {
 
       const userId =
-        socket.handshake.query.userId as string;
+        socket.handshake.query
+          .userId as string;
 
-      console.log(
-        `connected ${userId}`
-      );
+      if (!userId) {
 
-      socketRegistry.set(
-        socket.id,
-        socket
-      );
+        socket.disconnect();
 
-      await presenceService.setOnline(
+        return;
+
+      }
+
+      await presenceRepo.setOnline(
         userId,
         socket.id
       );
 
+      console.log(
+        `${userId} connected`
+      );
+
       socket.on(
-        SIGNALING_EVENTS.CALL_USER,
-        async (data) => {
+        "PING",
+        async () => {
+
+          await presenceRepo.refresh(
+            userId
+          );
+
+        }
+      );
+
+      socket.on(
+        "CALL_USER",
+        async ({ calleeId }) => {
+
+          const existingCall =
+            callStore.findByUser(
+              userId
+            );
+
+          if (existingCall) {
+
+            socket.emit(
+              "CALL_FAILED",
+              {
+                reason:
+                  "USER_BUSY"
+              }
+            );
+
+            return;
+
+          }
 
           const calleeSocketId =
-            await presenceService.getSocketId(
-              data.calleeId
+            await presenceRepo.getSocketId(
+              calleeId
             );
 
           if (!calleeSocketId) {
-            return;
-          }
 
-          const calleeSocket =
-            socketRegistry.get(
-              calleeSocketId
+            socket.emit(
+              "CALL_FAILED",
+              {
+                reason:
+                  "USER_OFFLINE"
+              }
             );
 
-          if (!calleeSocket) {
             return;
+
           }
 
-          const call =
-            callService.createCall(
+          const callId =
+            uuid();
+
+          const timeout =
+            setTimeout(
+              async () => {
+
+                const call =
+                  callStore.get(
+                    callId
+                  );
+
+                if (
+                  !call ||
+                  call.status ===
+                    "ANSWERED"
+                ) {
+                  return;
+                }
+
+                call.status =
+                  "MISSED";
+
+                await producer.publish({
+
+                  event:
+                    CallEventType.CALL_MISSED,
+
+                  callId,
+
+                  callerId:
+                    userId,
+
+                  calleeId,
+
+                  timestamp:
+                    Date.now()
+
+                });
+
+                io.to(
+                  socket.id
+                ).emit(
+                  "CALL_MISSED",
+                  {
+                    callId
+                  }
+                );
+
+                callStore.delete(
+                  callId
+                );
+
+              },
+
+              60000
+            );
+
+          callStore.set({
+
+            callId,
+
+            callerId:
               userId,
-              data.calleeId
-            );
 
-          calleeSocket.emit(
-            SIGNALING_EVENTS.INCOMING_CALL,
+            calleeId,
+
+            status:
+              "CREATED",
+
+            createdAt:
+              Date.now(),
+
+            timeout
+
+          });
+
+          await producer.publish({
+
+            event:
+              CallEventType.CALL_CREATED,
+
+            callId,
+
+            callerId:
+              userId,
+
+            calleeId,
+
+            timestamp:
+              Date.now()
+
+          });
+
+          io.to(
+            calleeSocketId
+          ).emit(
+            "INCOMING_CALL",
             {
-              callId: call.callId,
-              callerId: userId,
-              mediaType: "AUDIO"
+              callId,
+              callerId:
+                userId
             }
           );
 
@@ -97,104 +221,209 @@ export function registerSignalingGateway(
       );
 
       socket.on(
-        SIGNALING_EVENTS.ACCEPT_CALL,
-        async (data) => {
+        "CALL_ACCEPTED",
+        async ({ callId }) => {
+
+          const call =
+            callStore.get(
+              callId
+            );
+
+          if (!call) {
+            return;
+          }
+
+          clearTimeout(
+            call.timeout
+          );
+
+          call.status =
+            "ANSWERED";
+
+          call.answeredAt =
+            Date.now();
+
+          await producer.publish({
+
+            event:
+              CallEventType.CALL_ANSWERED,
+
+            callId,
+
+            callerId:
+              call.callerId,
+
+            calleeId:
+              call.calleeId,
+
+            timestamp:
+              call.answeredAt
+
+          });
 
           const callerSocketId =
-            await presenceService.getSocketId(
-              data.callerId
+            await presenceRepo.getSocketId(
+              call.callerId
             );
 
-          if (!callerSocketId) {
-            return;
-          }
+          if (
+            callerSocketId
+          ) {
 
-          const callerSocket =
-            socketRegistry.get(
+            io.to(
               callerSocketId
+            ).emit(
+              "CALL_ACCEPTED",
+              {
+                callId
+              }
             );
 
-          callerSocket?.emit(
-            SIGNALING_EVENTS.CALL_ACCEPTED,
-            data
-          );
+          }
 
         }
       );
 
       socket.on(
-        SIGNALING_EVENTS.WEBRTC_OFFER,
-        async (data) => {
+        "CALL_REJECTED",
+        async ({ callId }) => {
 
-          const calleeSocketId =
-            await presenceService.getSocketId(
-              data.calleeId
+          const call =
+            callStore.get(
+              callId
             );
 
-          if (!calleeSocketId) {
+          if (!call) {
             return;
           }
 
-          const calleeSocket =
-            socketRegistry.get(
-              calleeSocketId
-            );
-
-          calleeSocket?.emit(
-            SIGNALING_EVENTS.WEBRTC_OFFER,
-            data
+          clearTimeout(
+            call.timeout
           );
 
-        }
-      );
+          call.status =
+            "REJECTED";
 
-      socket.on(
-        SIGNALING_EVENTS.WEBRTC_ANSWER,
-        async (data) => {
+          await producer.publish({
+
+            event:
+              CallEventType.CALL_REJECTED,
+
+            callId,
+
+            callerId:
+              call.callerId,
+
+            calleeId:
+              call.calleeId,
+
+            timestamp:
+              Date.now()
+
+          });
 
           const callerSocketId =
-            await presenceService.getSocketId(
-              data.callerId
+            await presenceRepo.getSocketId(
+              call.callerId
             );
 
-          if (!callerSocketId) {
-            return;
+          if (
+            callerSocketId
+          ) {
+
+            io.to(
+              callerSocketId
+            ).emit(
+              "CALL_REJECTED",
+              {
+                callId
+              }
+            );
+
           }
 
-          const callerSocket =
-            socketRegistry.get(
-              callerSocketId
-            );
-
-          callerSocket?.emit(
-            SIGNALING_EVENTS.WEBRTC_ANSWER,
-            data
+          callStore.delete(
+            callId
           );
 
         }
       );
 
       socket.on(
-        SIGNALING_EVENTS.ICE_CANDIDATE,
-        async (data) => {
+        "CALL_ENDED",
+        async ({ callId }) => {
 
-          const targetSocketId =
-            await presenceService.getSocketId(
-              data.targetUserId
+          const call =
+            callStore.get(
+              callId
             );
 
-          if (!targetSocketId) {
+          if (!call) {
             return;
           }
 
-          const targetSocket =
-            socketRegistry.get(
-              targetSocketId
+          const endedAt =
+            Date.now();
+
+          const duration =
+            call.answeredAt
+              ? Math.floor(
+                  (
+                    endedAt -
+                    call.answeredAt
+                  ) / 1000
+                )
+              : 0;
+
+          await producer.publish({
+
+            event:
+              CallEventType.CALL_ENDED,
+
+            callId,
+
+            callerId:
+              call.callerId,
+
+            calleeId:
+              call.calleeId,
+
+            duration,
+
+            endedBy:
+              userId,
+
+            timestamp:
+              endedAt
+
+          });
+
+          const peerId =
+            call.callerId ===
+            userId
+              ? call.calleeId
+              : call.callerId;
+
+          const peerSocketId =
+            await presenceRepo.getSocketId(
+              peerId
             );
 
-          targetSocket?.emit(
-            SIGNALING_EVENTS.ICE_CANDIDATE,
-            data
+          if (peerSocketId) {
+
+            io.to(
+              peerSocketId
+            ).emit(
+              "CALL_ENDED",
+              {
+                callId
+              }
+            );
+
+          }
+
+          callStore.delete(
+            callId
           );
 
         }
@@ -205,15 +434,61 @@ export function registerSignalingGateway(
         async () => {
 
           console.log(
-            `disconnected ${userId}`
+            `${userId} disconnected`
           );
 
-          socketRegistry.delete(
-            socket.id
-          );
-
-          await presenceService.remove(
+          await presenceRepo.remove(
             userId
+          );
+
+          const activeCall =
+            callStore.findByUser(
+              userId
+            );
+
+          if (!activeCall) {
+            return;
+          }
+
+          const endedAt =
+            Date.now();
+
+          const duration =
+            activeCall.answeredAt
+              ? Math.floor(
+                  (
+                    endedAt -
+                    activeCall.answeredAt
+                  ) / 1000
+                )
+              : 0;
+
+          await producer.publish({
+
+            event:
+              CallEventType.CALL_ENDED,
+
+            callId:
+              activeCall.callId,
+
+            callerId:
+              activeCall.callerId,
+
+            calleeId:
+              activeCall.calleeId,
+
+            duration,
+
+            endedBy:
+              userId,
+
+            timestamp:
+              endedAt
+
+          });
+
+          callStore.delete(
+            activeCall.callId
           );
 
         }

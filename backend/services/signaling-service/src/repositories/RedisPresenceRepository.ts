@@ -22,6 +22,15 @@ export class RedisPresenceRepository
 
   }
 
+  async refresh(userId: string) {
+
+    await redisClient.expire(
+      `presence:${userId}`,
+      60
+    );
+
+  }
+
   async remove(userId: string) {
 
     await redisClient.del(
@@ -37,6 +46,35 @@ export class RedisPresenceRepository
     return redisClient.get(
       `presence:${userId}`
     );
+
+  }
+
+  async getOnlineUsers(): Promise<string[]> {
+
+    const keys =
+      await redisClient.keys(
+        "presence:*"
+      );
+
+    return keys.map(
+      key => key.replace(
+        "presence:",
+        ""
+      )
+    );
+
+  }
+
+  async isOnline(
+    userId: string
+  ): Promise<boolean> {
+
+    const socketId =
+      await this.getSocketId(
+        userId
+      );
+
+    return !!socketId;
 
   }
 

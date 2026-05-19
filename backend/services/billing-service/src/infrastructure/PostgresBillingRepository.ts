@@ -59,4 +59,42 @@ export class PostgresBillingRepository implements BillingRepository {
 
   }
 
+  async getBalance(userId: string): Promise<number> {
+
+    const res = await pool.query(
+      "SELECT balance FROM balances WHERE user_id=$1",
+      [userId]
+    );
+
+    if (!res.rows.length) {
+      throw new Error("USER_BALANCE_NOT_FOUND");
+    }
+
+    return Number(res.rows[0].balance);
+
+  }
+
+  async getInvoiceByCallId(callId: string) {
+
+    const res = await pool.query(
+      `
+      SELECT invoice_id, call_id, amount
+      FROM invoices
+      WHERE call_id=$1
+      `,
+      [callId]
+    );
+
+    if (!res.rows.length) {
+      throw new Error("INVOICE_NOT_FOUND");
+    }
+
+    return {
+      invoiceId: res.rows[0].invoice_id,
+      callId: res.rows[0].call_id,
+      amount: Number(res.rows[0].amount)
+    };
+
+  }
+
 }
