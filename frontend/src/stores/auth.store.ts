@@ -15,10 +15,18 @@ interface AuthStore {
 
   user: User | null;
 
+  sessionId: string | null;
+
   setAuth: (
     token: string,
     user: User
   ) => void;
+
+  setSession: (
+    sessionId: string
+  ) => void;
+
+  hydrate: () => void;
 
   logout: () => void;
 
@@ -32,12 +40,19 @@ export const useAuthStore =
 
       user: null,
 
+      sessionId: null,
+
       setAuth:
         (token, user) => {
 
           localStorage.setItem(
             "token",
             token
+          );
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify(user)
           );
 
           set({
@@ -47,15 +62,64 @@ export const useAuthStore =
 
         },
 
-      logout: () => {
+      setSession:
+        (sessionId) => {
 
-        localStorage.removeItem(
-          "token"
-        );
+          localStorage.setItem(
+            "sessionId",
+            sessionId
+          );
+
+          set({
+            sessionId
+          });
+
+        },
+
+      hydrate: () => {
+
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const user =
+          localStorage.getItem(
+            "user"
+          );
+
+        const sessionId =
+          localStorage.getItem(
+            "sessionId"
+          );
 
         set({
+
+          token,
+
+          sessionId,
+
+          user:
+            user
+              ? JSON.parse(user)
+              : null
+
+        });
+
+      },
+
+      logout: () => {
+
+        localStorage.clear();
+
+        set({
+
           token: null,
-          user: null
+
+          user: null,
+
+          sessionId: null
+
         });
 
       }

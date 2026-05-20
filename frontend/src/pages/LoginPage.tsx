@@ -1,3 +1,7 @@
+import {
+  LoginForm
+} from "../components/forms/LoginForm";
+
 export default function LoginPage() {
 
   return (
@@ -16,29 +20,26 @@ export default function LoginPage() {
           w-full
           max-w-md
           p-8
-          rounded-2xl
-          bg-slate-900/60
-          backdrop-blur-xl
+          rounded-3xl
+          bg-slate-900/70
           border
           border-slate-700
+          backdrop-blur-xl
           shadow-2xl
         "
       >
 
         <h1
           className="
-            text-3xl
+            text-4xl
             font-bold
             mb-6
           "
         >
-          Login
+          Call Platform
         </h1>
 
-        <p>
-          Login UI coming in
-          Phase 2
-        </p>
+        <LoginForm />
 
       </div>
 

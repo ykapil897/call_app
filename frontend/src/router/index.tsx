@@ -21,6 +21,10 @@ import HistoryPage
 import CallPage
   from "../pages/CallPage";
 
+import {
+  ProtectedRoute
+} from "../components/auth/ProtectedRoute";
+
 export const router =
   createBrowserRouter([
 
@@ -33,7 +37,15 @@ export const router =
     {
       path: "/",
 
-      element: <AppLayout />,
+      element: (
+
+        <ProtectedRoute>
+
+            <AppLayout />
+
+        </ProtectedRoute>
+
+    ),
 
       children: [
 

@@ -71,6 +71,96 @@ registerSignalingGateway(
       );
 
       socket.on(
+        "WEBRTC_OFFER",
+        async ({
+          targetUserId,
+          offer
+        }) => {
+
+          const targetSocketId =
+            await presenceRepo.get(
+              targetUserId
+            );
+
+          if (!targetSocketId) {
+            return;
+          }
+
+          io.to(
+            targetSocketId
+          ).emit(
+            "WEBRTC_OFFER",
+            {
+              fromUserId:
+                userId,
+              offer
+            }
+          );
+
+        }
+      );
+
+      socket.on(
+        "WEBRTC_ANSWER",
+        async ({
+          targetUserId,
+          answer
+        }) => {
+
+          const targetSocketId =
+            await presenceRepo.get(
+              targetUserId
+            );
+
+          if (!targetSocketId) {
+            return;
+          }
+
+          io.to(
+            targetSocketId
+          ).emit(
+            "WEBRTC_ANSWER",
+            {
+              fromUserId:
+                userId,
+              answer
+            }
+          );
+
+        }
+      );
+
+      socket.on(
+        "WEBRTC_ANSWER",
+        async ({
+          targetUserId,
+          answer
+        }) => {
+
+          const targetSocketId =
+            await presenceRepo.get(
+              targetUserId
+            );
+
+          if (!targetSocketId) {
+            return;
+          }
+
+          io.to(
+            targetSocketId
+          ).emit(
+            "WEBRTC_ANSWER",
+            {
+              fromUserId:
+                userId,
+              answer
+            }
+          );
+
+        }
+      );
+
+      socket.on(
         "CALL_USER",
         async ({ calleeId }) => {
 
@@ -275,7 +365,11 @@ registerSignalingGateway(
             ).emit(
               "CALL_ACCEPTED",
               {
-                callId
+                callId,
+                callerId:
+                  call.callerId,
+                calleeId:
+                  call.calleeId
               }
             );
 

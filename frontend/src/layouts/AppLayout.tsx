@@ -3,7 +3,23 @@ import {
   Link
 } from "react-router-dom";
 
+import {
+  useNavigate
+} from "react-router-dom";
+
+import {
+  logoutSession
+} from "../api/session.api";
+
+import {
+  useAuthStore
+} from "../stores/auth.store";
+
 export function AppLayout() {
+
+    const navigate = useNavigate();
+
+    const auth = useAuthStore();
 
   return (
 
@@ -54,6 +70,34 @@ export function AppLayout() {
           <Link to="/history">
             History
           </Link>
+
+          <button
+
+            onClick={async () => {
+
+                if (auth.sessionId) {
+
+                await logoutSession(
+                    auth.sessionId
+                );
+
+                }
+
+                auth.logout();
+
+                navigate("/login");
+
+            }}
+
+            className="
+                text-red-400
+                hover:text-red-300
+            "
+            >
+
+            Logout
+
+            </button>
 
         </div>
 
