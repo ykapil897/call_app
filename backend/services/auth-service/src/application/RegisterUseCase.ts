@@ -4,6 +4,9 @@ import { UserRepository }
 import { PasswordService }
   from "../services/PasswordService";
 
+import { TokenService }
+  from "../services/TokenService";
+
 export class RegisterUseCase {
 
   constructor(
@@ -12,7 +15,10 @@ export class RegisterUseCase {
       UserRepository,
 
     private passwordService:
-      PasswordService
+      PasswordService,
+
+    private tokenService:
+      TokenService
 
   ) {}
 
@@ -47,13 +53,24 @@ export class RegisterUseCase {
       await this.userRepository
         .findByEmail(email);
 
+    const token =
+      this.tokenService.generate(
+        created!.id
+      );
+
     return {
 
-      userId:
-        created!.id,
+      token,
 
-      email:
-        created!.email
+      user: {
+
+        userId:
+          created!.id,
+
+        email:
+          created!.email
+
+      }
 
     };
 

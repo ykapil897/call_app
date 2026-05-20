@@ -41,9 +41,19 @@ export class AuthFactory {
     const passwordService =
       new PasswordService();
 
+    const tokenService =
+      new TokenService(
+        process.env.JWT_SECRET!
+      );
+
     return new RegisterUseCase(
+
       repo,
-      passwordService
+
+      passwordService,
+
+      tokenService
+
     );
 
   }
