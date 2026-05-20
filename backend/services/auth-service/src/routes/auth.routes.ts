@@ -12,4 +12,6 @@ export async function authRoutes(app: FastifyInstance) {
   }));
 
   app.get("/auth/user", AuthController.getUser);
+
+  app.post("/auth/register", AuthController.register);
 }

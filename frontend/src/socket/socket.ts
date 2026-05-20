@@ -3,8 +3,20 @@ import { io }
 
 export const socket =
   io(
-    "http://localhost:3007",
+
+    import.meta.env
+      .VITE_SIGNALING_URL,
+
     {
-      autoConnect: false
+
+      autoConnect: false,
+
+      reconnection: true,
+
+      reconnectionAttempts: 10,
+
+      reconnectionDelay: 1000
+
     }
+
   );

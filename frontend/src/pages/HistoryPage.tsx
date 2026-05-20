@@ -15,6 +15,10 @@ import {
   HistoryCard
 } from "../components/cards/HistoryCard";
 
+import { 
+  EmptyState 
+} from "../components/ui/EmptyState";
+
 export default function
 HistoryPage() {
 
@@ -81,50 +85,53 @@ HistoryPage() {
 
       </div>
 
-      <div
-        className="
-          flex
-          flex-col
-          gap-4
-        "
-      >
+      {
+        history.length === 0
+          ? (
 
-        {
-          history.map(
-            (call) => (
+            <EmptyState
 
-              <HistoryCard
+              title="No call history"
 
-                key={
-                  call.call_id
-                }
+              description="Your completed calls will appear here"
 
-                status={
-                  call.status
-                }
+            />
 
-                duration={
-                  call.duration
-                }
-
-                endedAt={
-                  call.ended_at
-                }
-
-                peerId={
-                  call.caller_id ===
-                  user?.userId
-                    ? call.callee_id
-                    : call.caller_id
-                }
-
-              />
-
-            )
           )
-        }
+          : (
 
-      </div>
+            <div
+              className="
+                flex
+                flex-col
+                gap-4
+              "
+            >
+
+              {
+                history.map(
+                  (call) => (
+
+                    <HistoryCard
+                      key={call.call_id}
+                      status={call.status}
+                      duration={call.duration}
+                      endedAt={call.ended_at}
+                      peerId={
+                        call.caller_id === user?.userId
+                          ? call.callee_id
+                          : call.caller_id
+                      }
+                    />
+
+                  )
+                )
+              }
+
+            </div>
+
+          )
+      }
 
     </div>
 

@@ -1,11 +1,16 @@
 import {
+  Link,
   Outlet,
-  Link
+  useLocation,
+  useNavigate
 } from "react-router-dom";
 
 import {
-  useNavigate
-} from "react-router-dom";
+  Phone,
+  Wallet,
+  History,
+  LayoutDashboard
+} from "lucide-react";
 
 import {
   logoutSession
@@ -15,100 +20,224 @@ import {
   useAuthStore
 } from "../stores/auth.store";
 
-export function AppLayout() {
+export default function
+AppLayout() {
 
-    const navigate = useNavigate();
+  const location =
+    useLocation();
 
-    const auth = useAuthStore();
+  const navigate =
+    useNavigate();
+
+  const auth =
+    useAuthStore();
+
+  async function logout() {
+
+    try {
+
+      if (auth.sessionId) {
+
+        await logoutSession(
+          auth.sessionId
+        );
+
+      }
+
+    } finally {
+
+      auth.logout();
+
+      navigate("/login");
+
+    }
+
+  }
+
+  const links = [
+
+    {
+      path: "/",
+      label: "Dashboard",
+      icon: LayoutDashboard
+    },
+
+    {
+      path: "/history",
+      label: "History",
+      icon: History
+    },
+
+    {
+      path: "/billing",
+      label: "Billing",
+      icon: Wallet
+    }
+
+  ];
 
   return (
 
     <div
       className="
         min-h-screen
+        bg-gradient-to-br
+        from-slate-950
+        via-slate-900
+        to-slate-950
         text-white
       "
     >
 
-      <nav
+      <header
         className="
-          flex
-          items-center
-          justify-between
-          px-6
-          py-4
+          sticky
+          top-0
+          z-40
+          backdrop-blur-xl
+          bg-slate-950/70
           border-b
           border-slate-800
-          backdrop-blur-md
         "
       >
-
-        <h1
-          className="
-            text-2xl
-            font-bold
-          "
-        >
-          Call Platform
-        </h1>
 
         <div
           className="
+            max-w-7xl
+            mx-auto
+            px-6
+            h-16
             flex
-            gap-6
+            items-center
+            justify-between
           "
         >
 
-          <Link to="/">
-            Dashboard
-          </Link>
+          <div
+            className="
+              flex
+              items-center
+              gap-3
+            "
+          >
 
-          <Link to="/billing">
-            Billing
-          </Link>
+            <Phone
+              className="
+                text-green-400
+              "
+            />
 
-          <Link to="/history">
-            History
-          </Link>
+            <h1
+              className="
+                text-xl
+                font-bold
+              "
+            >
+              Call Platform
+            </h1>
 
-          <button
+          </div>
 
-            onClick={async () => {
+          <nav
+            className="
+              flex
+              items-center
+              gap-3
+            "
+          >
 
-                if (auth.sessionId) {
+            {
+              links.map(
+                (link) => {
 
-                await logoutSession(
-                    auth.sessionId
-                );
+                  const Icon =
+                    link.icon;
+
+                  const active =
+                    location.pathname ===
+                    link.path;
+
+                  return (
+
+                    <Link
+
+                      key={
+                        link.path
+                      }
+
+                      to={
+                        link.path
+                      }
+
+                      className={`
+                        px-4
+                        py-2
+                        rounded-xl
+                        flex
+                        items-center
+                        gap-2
+                        transition
+                        hover:bg-slate-800
+                        ${
+                          active
+                            ? "bg-slate-800 text-green-400"
+                            : "text-slate-300"
+                        }
+                      `}
+                    >
+
+                      <Icon
+                        size={18}
+                      />
+
+                      {
+                        link.label
+                      }
+
+                    </Link>
+
+                  );
 
                 }
+              )
+            }
 
-                auth.logout();
+            <button
 
-                navigate("/login");
+              onClick={logout}
 
-            }}
-
-            className="
-                text-red-400
-                hover:text-red-300
-            "
+              className="
+                ml-4
+                px-4
+                py-2
+                rounded-xl
+                bg-red-600
+                hover:bg-red-500
+                transition
+              "
             >
 
-            Logout
+              Logout
 
             </button>
 
+          </nav>
+
         </div>
 
-      </nav>
+      </header>
 
       <main
         className="
-          p-6
+          max-w-7xl
+          mx-auto
+          px-6
+          py-8
         "
       >
+
         <Outlet />
+
       </main>
 
     </div>

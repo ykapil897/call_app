@@ -16,9 +16,10 @@ export default function DashboardPage() {
 
     <div
       className="
-        flex
-        flex-col
-        gap-8
+        grid
+        grid-cols-1
+        xl:grid-cols-2
+        gap-6
       "
     >
 

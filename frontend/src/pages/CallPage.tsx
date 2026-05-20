@@ -32,6 +32,10 @@ import {
 } from "../components/call/CallTimer";
 
 import {
+  RingingScreen
+} from "../components/call/RingingScreen";
+
+import {
   getInvoice,
   getBalance
 } from "../api/billing.api";
@@ -56,22 +60,22 @@ CallPage() {
         s.activeCall
     );
 
-    const user =
-        useAuthStore(
-            (s) => s.user
+  const user =
+    useAuthStore(
+      (s) => s.user
     );
 
-    const {
+  const {
 
-        summaryOpen,
+    summaryOpen,
 
-        callSummary,
+    callSummary,
 
-        setSummary,
+    setSummary,
 
-        closeSummary
+    closeSummary
 
-    } = useCallStore();
+  } = useCallStore();
 
   const setActiveCall =
     useCallStore(
@@ -100,6 +104,9 @@ CallPage() {
   const [seconds, setSeconds] =
     useState(0);
 
+  const [connected, setConnected] =
+    useState(false);
+
   useEffect(() => {
 
     createOffer();
@@ -119,48 +126,61 @@ CallPage() {
 
     socket.on(
 
-        SOCKET_EVENTS
-            .CALL_ENDED,
+      SOCKET_EVENTS
+        .CALL_ACCEPTED,
 
-        async () => {
+      () => {
 
-            if (
-            activeCall &&
-            user
-            ) {
+        setConnected(true);
 
-            const invoice =
-                await getInvoice(
-                activeCall.callId
-                );
+      }
 
-            const balance =
-                await getBalance(
-                user.userId
-                );
+    );
 
-            setSummary({
+    socket.on(
 
-                duration:
-                seconds,
+      SOCKET_EVENTS
+        .CALL_ENDED,
 
-                amount:
-                invoice.amount,
+      async () => {
 
-                balance:
-                balance.balance
+        if (
+          activeCall &&
+          user
+        ) {
 
-            });
-
-            }
-
-            setActiveCall(
-            null
+          const invoice =
+            await getInvoice(
+              activeCall.callId
             );
 
-            navigate("/");
+          const balance =
+            await getBalance(
+              user.userId
+            );
+
+          setSummary({
+
+            duration:
+              seconds,
+
+            amount:
+              invoice.amount,
+
+            balance:
+              balance.balance
+
+          });
 
         }
+
+        setActiveCall(
+          null
+        );
+
+        navigate("/");
+
+      }
 
     );
 
@@ -168,6 +188,16 @@ CallPage() {
 
       clearInterval(
         interval
+      );
+
+      socket.off(
+        SOCKET_EVENTS
+          .CALL_ACCEPTED
+      );
+
+      socket.off(
+        SOCKET_EVENTS
+          .CALL_ENDED
       );
 
     };
@@ -209,28 +239,44 @@ CallPage() {
       "
     >
 
-      <div
-        className="
-          w-40
-          h-40
-          rounded-full
-          bg-green-500/20
-          animate-pulse
-        "
-      />
+      {
+        !connected
+          ? (
 
-      <h1
-        className="
-          text-4xl
-          font-bold
-        "
-      >
-        Active Call
-      </h1>
+            <RingingScreen />
 
-      <CallTimer
-        seconds={seconds}
-      />
+          )
+          : (
+
+            <>
+
+              <div
+                className="
+                  w-40
+                  h-40
+                  rounded-full
+                  bg-green-500/20
+                  animate-pulse
+                "
+              />
+
+              <h1
+                className="
+                  text-4xl
+                  font-bold
+                "
+              >
+                Active Call
+              </h1>
+
+              <CallTimer
+                seconds={seconds}
+              />
+
+            </>
+
+          )
+      }
 
       <CallControls
         muted={muted}
@@ -243,20 +289,20 @@ CallPage() {
         open={summaryOpen}
 
         duration={
-            callSummary?.duration || 0
+          callSummary?.duration || 0
         }
 
         amount={
-            callSummary?.amount || 0
+          callSummary?.amount || 0
         }
 
         balance={
-            callSummary?.balance || 0
+          callSummary?.balance || 0
         }
 
         onClose={closeSummary}
 
-    />
+      />
 
       <audio
         autoPlay

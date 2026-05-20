@@ -3,6 +3,7 @@ import { PasswordService } from "../services/PasswordService";
 import { TokenService } from "../services/TokenService";
 import { LoginUseCase } from "../application/LoginUseCase";
 import { GetUserByEmailUseCase } from "../application/GetUserByEmailUseCase";
+import { RegisterUseCase } from "../application/RegisterUseCase";
 
 export class AuthFactory {
 
@@ -28,6 +29,21 @@ export class AuthFactory {
 
     return new GetUserByEmailUseCase(
       repo
+    );
+
+  }
+
+  static createRegisterUseCase() {
+
+    const repo =
+      new PostgresUserRepository();
+
+    const passwordService =
+      new PasswordService();
+
+    return new RegisterUseCase(
+      repo,
+      passwordService
     );
 
   }

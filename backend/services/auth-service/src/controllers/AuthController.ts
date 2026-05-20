@@ -92,4 +92,97 @@ export class AuthController {
 
   }
 
+  static async register(
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) {
+
+    const {
+      email,
+      password
+    } = req.body as any;
+
+    const useCase =
+      AuthFactory
+        .createRegisterUseCase();
+
+    try {
+
+      const user =
+        await useCase.execute(
+          email,
+          password
+        );
+
+      return {
+        success: true,
+        data: user,
+        meta: {
+          serverTime: Date.now()
+        }
+      };
+
+    } catch (err: any) {
+
+      if (
+        err.message ===
+        "USER_ALREADY_EXISTS"
+      ) {
+
+        return reply
+          .status(409)
+          .send({
+
+            success: false,
+
+            error: {
+
+              code:
+                "USER_ALREADY_EXISTS",
+
+              message:
+                "User already exists",
+
+              retryable: false
+
+            },
+
+            meta: {
+              serverTime:
+                Date.now()
+            }
+
+          });
+
+      }
+
+      return reply
+        .status(500)
+        .send({
+
+          success: false,
+
+          error: {
+
+            code:
+              "INTERNAL_SERVER_ERROR",
+
+            message:
+              "Registration failed",
+
+            retryable: false
+
+          },
+
+          meta: {
+            serverTime:
+              Date.now()
+          }
+
+        });
+
+    }
+
+  }
+
 }

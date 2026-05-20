@@ -2,6 +2,9 @@ import {
   useEffect
 } from "react";
 
+import toast
+  from "react-hot-toast";
+
 import {
   socket
 } from "../socket/socket";
@@ -100,6 +103,51 @@ export function useSocket() {
             });
 
         }
+
+    );
+
+    socket.on(
+
+      SOCKET_EVENTS
+        .INCOMING_CALL,
+
+      () => {
+
+        toast.success(
+          "Incoming call"
+        );
+
+      }
+
+    );
+
+    socket.on(
+
+      SOCKET_EVENTS
+        .CALL_REJECTED,
+
+      () => {
+
+        toast.error(
+          "Call rejected"
+        );
+
+      }
+
+    );
+
+    socket.on(
+
+      SOCKET_EVENTS
+        .CALL_ENDED,
+
+      () => {
+
+        toast(
+          "Call ended"
+        );
+
+      }
 
     );
 
