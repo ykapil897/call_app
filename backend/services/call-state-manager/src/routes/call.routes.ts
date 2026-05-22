@@ -3,10 +3,9 @@ import { CallController } from "../controllers/CallController";
 
 export async function callRoutes(app: FastifyInstance) {
 
-  app.post("/call/initiate", CallController.initiate);
+  app.post("/initiate", CallController.initiate);
 
-  app.post("/call/answer", CallController.answer);
+  app.post("/answer", CallController.answer);
 
-  app.post("/call/hangup", CallController.hangup);
-
+  app.post("/hangup", CallController.hangup);
 }

@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import fastifyCors from "@fastify/cors";
 import { gatewayRoutes } from "./routes/gateway.routes";
 import { healthRoute } from "./health/health.route";
 import { metricsRoute } from "./metrics/metrics.route";
@@ -12,6 +13,11 @@ export async function buildApp() {
     logger: {
       level: "info",
     } });
+
+  await app.register(fastifyCors, {
+    origin: true,
+    credentials: true
+  });
 
   healthRoute(app);
   metricsRoute(app);

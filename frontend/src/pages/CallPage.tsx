@@ -84,8 +84,11 @@ CallPage() {
     );
 
   const peerUserId =
-    activeCall?.callerId ||
-    "";
+    activeCall
+      ? activeCall.callerId === user?.userId
+        ? activeCall.calleeId
+        : activeCall.callerId
+      : "";
 
   const {
 
@@ -109,9 +112,29 @@ CallPage() {
 
   useEffect(() => {
 
-    createOffer();
+    if (
+      activeCall?.callerId ===
+      user?.userId
+    ) {
 
-  }, []);
+      console.log(
+        "CREATE OFFER CHECK",
+        {
+          currentUser:
+            user?.userId,
+          callerId:
+            activeCall?.callerId
+        }
+      );
+
+      createOffer();
+
+    }
+
+  }, [
+    activeCall,
+    user
+  ]);
 
   useEffect(() => {
 

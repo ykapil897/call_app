@@ -21,18 +21,25 @@ import {
   useCallStore
 } from "../stores/call.store";
 
+
+
 export function useSocket() {
 
   const user =
-    useAuthStore(
-      (s) => s.user
-    );
+  useAuthStore(
+    (s) => s.user
+  );
 
-    const setActiveCall =
-        useCallStore(
-            (s) =>
-            s.setActiveCall
-    );
+  console.log(
+    "User in socket hook:",
+    user
+  );
+
+  const setActiveCall =
+      useCallStore(
+          (s) =>
+          s.setActiveCall
+  );
 
   const setIncomingCall =
     useCallStore(
@@ -43,6 +50,9 @@ export function useSocket() {
   useEffect(() => {
 
     if (!user) {
+      console.log(
+        "No user, not connecting socket"
+      );
       return;
     }
 
@@ -64,58 +74,84 @@ export function useSocket() {
 
       }, 20000);
 
+    
     socket.on(
+      SOCKET_EVENTS.CALL_CREATED,
+      (call) => {
 
-      SOCKET_EVENTS
-        .INCOMING_CALL,
+        setActiveCall({
 
-      (data) => {
+          callId:
+            call.callId,
 
-        setIncomingCall(
-          data
-        );
+          callerId:
+            call.callerId,
+
+          calleeId:
+            call.calleeId,
+
+          status:
+            "CREATED"
+
+        });
 
       }
-
     );
+        
+
 
     socket.on(
+      SOCKET_EVENTS.INCOMING_CALL,
+      (data) => {
 
-        SOCKET_EVENTS
-            .CALL_ACCEPTED,
-
-        (data) => {
-
-            setActiveCall({
-
-            callId:
-                data.callId,
-
-            callerId:
-                data.callerId,
-
-            calleeId:
-                data.calleeId,
-
-            status:
-                "ANSWERED"
-
-            });
-
-        }
-
-    );
-
-    socket.on(
-
-      SOCKET_EVENTS
-        .INCOMING_CALL,
-
-      () => {
+        setIncomingCall(data);
 
         toast.success(
           "Incoming call"
         );
+
+      }
+    );
+
+    socket.on(
+
+      SOCKET_EVENTS
+        .CALL_ACCEPTED,
+
+      (data) => {
+
+        const current =
+          useCallStore
+            .getState()
+            .activeCall;
+
+        if (!current) {
+          return;
+        }
+
+        // ONLY caller updates here
+        if (
+          current.callerId !==
+          user?.userId
+        ) {
+          return;
+        }
+
+        setActiveCall({
+
+          callId:
+            data.callId,
+
+          callerId:
+            data.callerId,
+
+          calleeId:
+            data.calleeId,
+
+          status:
+            "ANSWERED"
+
+        });
 
       }
 

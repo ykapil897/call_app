@@ -14,11 +14,20 @@ import {
   useNavigate
 } from "react-router-dom";
 
+import {
+  useAuthStore
+} from "../../stores/auth.store";
+
 export function
 IncomingCallModal() {
 
   const navigate =
     useNavigate();
+
+  const user =
+    useAuthStore(
+      (s) => s.user
+    );
 
   const incomingCall =
     useCallStore(
@@ -44,6 +53,10 @@ IncomingCallModal() {
 
   function acceptCall() {
 
+    if (!user) {
+      return;
+    }
+
     socket.emit(
 
       SOCKET_EVENTS
@@ -64,18 +77,19 @@ IncomingCallModal() {
       callerId:
         incomingCall.callerId,
 
-      calleeId: "",
+      calleeId:
+        user.userId,
 
       status:
         "ANSWERED"
 
     });
 
+    setIncomingCall(null);
+
     navigate(
       `/call/${incomingCall.callId}`
     );
-
-    setIncomingCall(null);
 
   }
 

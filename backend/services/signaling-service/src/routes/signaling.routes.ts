@@ -10,17 +10,17 @@ export function signalingRoutes(
 ) {
 
   app.get(
-    "/signaling/status",
+    "/status",
     SignalingController.status
   );
 
   app.get(
-    "/signaling/online-users",
+    "/online-users",
     SignalingController.onlineUsers
   );
 
   app.get(
-    "/signaling/presence",
+    "/presence",
     SignalingController.presence
   );
 

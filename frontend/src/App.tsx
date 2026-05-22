@@ -50,7 +50,6 @@ export default function App() {
         router={router}
       />
 
-      <IncomingCallModal />
 
     </>
 

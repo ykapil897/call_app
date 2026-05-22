@@ -6,7 +6,7 @@ export const socket =
 
     import.meta.env
       .VITE_SIGNALING_URL,
-
+    
     {
 
       autoConnect: false,
@@ -18,5 +18,5 @@ export const socket =
       reconnectionDelay: 1000
 
     }
-
+    
   );

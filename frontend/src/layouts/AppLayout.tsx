@@ -19,6 +19,7 @@ import {
 import {
   useAuthStore
 } from "../stores/auth.store";
+import { IncomingCallModal } from "../components/modals/IncomingCallModal";
 
 export default function
 AppLayout() {
@@ -237,6 +238,9 @@ AppLayout() {
       >
 
         <Outlet />
+
+        <IncomingCallModal />
+
 
       </main>
 

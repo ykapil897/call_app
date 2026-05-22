@@ -78,7 +78,7 @@ registerSignalingGateway(
         }) => {
 
           const targetSocketId =
-            await presenceRepo.get(
+            await presenceRepo.getSocketId(
               targetUserId
             );
 
@@ -108,7 +108,7 @@ registerSignalingGateway(
         }) => {
 
           const targetSocketId =
-            await presenceRepo.get(
+            await presenceRepo.getSocketId(
               targetUserId
             );
 
@@ -131,14 +131,14 @@ registerSignalingGateway(
       );
 
       socket.on(
-        "WEBRTC_ANSWER",
+        "ICE_CANDIDATE",
         async ({
           targetUserId,
-          answer
+          candidate
         }) => {
 
           const targetSocketId =
-            await presenceRepo.get(
+            await presenceRepo.getSocketId(
               targetUserId
             );
 
@@ -149,11 +149,11 @@ registerSignalingGateway(
           io.to(
             targetSocketId
           ).emit(
-            "WEBRTC_ANSWER",
+            "ICE_CANDIDATE",
             {
               fromUserId:
                 userId,
-              answer
+              candidate
             }
           );
 
@@ -279,6 +279,15 @@ registerSignalingGateway(
 
           });
 
+          io.to(socket.id).emit(
+            "CALL_CREATED",
+            {
+              callId,
+              callerId: userId,
+              calleeId
+            }
+          );
+
           await producer.publish({
 
             event:
@@ -370,6 +379,15 @@ registerSignalingGateway(
                   call.callerId,
                 calleeId:
                   call.calleeId
+              }
+            );
+
+            io.to(socket.id).emit(
+              "CALL_ACCEPTED",
+              {
+                callId,
+                callerId: call.callerId,
+                calleeId: call.calleeId
               }
             );
 

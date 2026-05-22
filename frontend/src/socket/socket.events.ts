@@ -4,6 +4,9 @@ export const SOCKET_EVENTS = {
 
   CALL_USER: "CALL_USER",
 
+  CALL_CREATED:
+  "CALL_CREATED",
+
   INCOMING_CALL:
     "INCOMING_CALL",
 

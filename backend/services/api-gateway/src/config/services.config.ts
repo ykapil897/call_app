@@ -1,9 +1,8 @@
 export const services = {
 
-  auth: "http://localhost:3000",
-  session: "http://localhost:3001",
-  call: "http://localhost:3002",
-  billing: "http://localhost:3003",
-  signaling: "http://localhost:3007"
-
+  auth: "http://auth-service:3000",
+  session: "http://session-service:3000",
+  call: "http://call-state-manager:3000",
+  billing: "http://billing-service:3000",
+  signaling: "http://signaling-service:3000"
 };

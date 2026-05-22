@@ -3,15 +3,15 @@ import { AuthController } from "../controllers/AuthController";
 
 export async function authRoutes(app: FastifyInstance) {
 
-  app.post("/auth/login", AuthController.login);
+  app.post("/login", AuthController.login);
 
-  app.post("/auth/logout", async () => ({
+  app.post("/logout", async () => ({
     success: true,
     data: {},
     meta: { serverTime: Date.now() }
   }));
 
-  app.get("/auth/user", AuthController.getUser);
+  app.get("/user", AuthController.getUser);
 
-  app.post("/auth/register", AuthController.register);
+  app.post("/register", AuthController.register);
 }
