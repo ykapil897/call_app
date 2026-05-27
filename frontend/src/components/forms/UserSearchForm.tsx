@@ -120,32 +120,6 @@ export function UserSearchForm() {
       }
     );
 
-    socket.once(
-      "CALL_ACCEPTED",
-      ({ callId }) => {
-
-        setActiveCall({
-
-          callId,
-
-          callerId:
-            currentUser.userId,
-
-          calleeId:
-            result.userId,
-
-          status:
-            "ANSWERED"
-
-        });
-
-        navigate(
-          `/call/${callId}`
-        );
-
-      }
-    );
-
   }
 
   return (

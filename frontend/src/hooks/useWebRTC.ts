@@ -83,6 +83,9 @@ export function useWebRTC(
           });
       
       if (!mounted) {
+        console.log(
+          "Component unmounted, not setting stream"
+        );
         return;
       }
 

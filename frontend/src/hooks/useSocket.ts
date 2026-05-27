@@ -21,9 +21,14 @@ import {
   useCallStore
 } from "../stores/call.store";
 
+import { useNavigate
+} from "react-router-dom";
 
 
 export function useSocket() {
+
+  const navigate =
+    useNavigate();
 
   const user =
   useAuthStore(
@@ -95,6 +100,8 @@ export function useSocket() {
 
         });
 
+        toast.loading("Calling...");
+
       }
     );
         
@@ -153,6 +160,10 @@ export function useSocket() {
 
         });
 
+        navigate(
+          `/call/${data.callId}`
+        );
+
       }
 
     );
@@ -182,6 +193,35 @@ export function useSocket() {
         toast(
           "Call ended"
         );
+
+      }
+
+    );
+
+    socket.on(
+
+      SOCKET_EVENTS
+        .CALL_MISSED,
+
+      () => {
+
+        toast.dismiss();
+
+        toast(
+          "Call missed"
+        );
+
+        useCallStore
+          .getState()
+          .setActiveCall(
+            null
+          );
+
+        useCallStore
+          .getState()
+          .setIncomingCall(
+            null
+          );
 
       }
 

@@ -34,7 +34,7 @@ RingingScreen() {
             font-bold
           "
         >
-          Calling...
+          Ringing...
         </h1>
 
         <p
@@ -43,7 +43,7 @@ RingingScreen() {
             mt-2
           "
         >
-          Waiting for answer
+          Waiting, Let him pick the call!!!
         </p>
 
       </div>

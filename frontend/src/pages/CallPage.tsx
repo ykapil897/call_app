@@ -90,6 +90,11 @@ CallPage() {
         : activeCall.callerId
       : "";
 
+  console.log(
+    "Peer User ID:",
+    peerUserId
+  );  
+  
   const {
 
     createOffer,
@@ -147,18 +152,20 @@ CallPage() {
 
       }, 1000);
 
-    socket.on(
+    // socket.on(
 
-      SOCKET_EVENTS
-        .CALL_ACCEPTED,
+    //   SOCKET_EVENTS
+    //     .CALL_ACCEPTED,
 
-      () => {
+    //   () => {
 
-        setConnected(true);
+    //     setConnected(true);
 
-      }
+    //   }
 
-    );
+    // );
+
+    setConnected(true);
 
     socket.on(
 
@@ -167,15 +174,31 @@ CallPage() {
 
       async () => {
 
-        if (
-          activeCall &&
-          user
-        ) {
+        if (!activeCall || !user) {
+
+          setActiveCall(null);
+
+          navigate("/");
+
+          return;
+
+        }
+
+        const callId =
+          activeCall.callId;
+
+        const isCaller =
+          activeCall.callerId ===
+            user.userId;
+
+        setActiveCall(null);
+
+        navigate("/");
+
+        if (isCaller) {
 
           const invoice =
-            await getInvoice(
-              activeCall.callId
-            );
+            await getInvoice(callId);
 
           const balance =
             await getBalance(
@@ -196,12 +219,6 @@ CallPage() {
           });
 
         }
-
-        setActiveCall(
-          null
-        );
-
-        navigate("/");
 
       }
 
@@ -227,25 +244,45 @@ CallPage() {
 
   }, []);
 
-  function hangup() {
+  async function hangup() {
+
+    if (!activeCall || !user) {
+      return;
+    }
+
+    const callId =
+      activeCall.callId;
+
+    const isCaller =
+      activeCall.callerId ===
+        user.userId;
 
     socket.emit(
-
-      SOCKET_EVENTS
-        .CALL_ENDED,
-
-      {
-        callId:
-          activeCall?.callId
-      }
-
+      SOCKET_EVENTS.CALL_ENDED,
+      { callId }
     );
 
-    setActiveCall(
-      null
-    );
+    setActiveCall(null);
 
     navigate("/");
+
+    if (isCaller) {
+
+      const invoice =
+        await getInvoice(callId);
+
+      const balance =
+        await getBalance(
+          user.userId
+        );
+
+      setSummary({
+        duration: seconds,
+        amount: invoice.amount,
+        balance: balance.balance
+      });
+
+    }
 
   }
 

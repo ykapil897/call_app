@@ -510,11 +510,9 @@ registerSignalingGateway(
 
           });
 
-          const peerId =
-            call.callerId ===
-            userId
-              ? call.calleeId
-              : call.callerId;
+          const peerId = userId === call.callerId
+            ? call.calleeId
+            : call.callerId 
 
           const peerSocketId =
             await presenceRepo.getSocketId(
@@ -598,6 +596,37 @@ registerSignalingGateway(
               endedAt
 
           });
+
+          // FIND OTHER USER
+          const peerId =
+            activeCall.callerId ===
+            userId
+              ? activeCall.calleeId
+              : activeCall.callerId;
+
+          // GET PEER SOCKET
+          const peerSocketId =
+            await presenceRepo.getSocketId(
+              peerId
+            );
+
+          // NOTIFY PEER
+          if (peerSocketId) {
+
+            io.to(
+              peerSocketId
+            ).emit(
+              "CALL_ENDED",
+              {
+                callId:
+                  activeCall.callId,
+
+                reason:
+                  "DISCONNECTED"
+              }
+            );
+
+          }
 
           callStore.delete(
             activeCall.callId
