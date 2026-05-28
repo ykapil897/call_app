@@ -22,6 +22,10 @@ import {
 
 import { IncomingCallModal } from "../components/modals/IncomingCallModal";
 
+import {
+  GlobalCallSummary
+} from "../components/modals/GlobalCallSummary";
+
 export default function
 AppLayout() {
 
@@ -241,6 +245,8 @@ AppLayout() {
         <Outlet />
 
         <IncomingCallModal />
+
+        <GlobalCallSummary />
 
 
       </main>

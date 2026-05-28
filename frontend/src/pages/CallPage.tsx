@@ -44,10 +44,6 @@ import {
   useAuthStore
 } from "../stores/auth.store";
 
-import {
-  CallSummaryModal
-} from "../components/modals/CallSummaryModal";
-
 export default function
 CallPage() {
 
@@ -65,17 +61,10 @@ CallPage() {
       (s) => s.user
     );
 
-  const {
-
-    summaryOpen,
-
-    callSummary,
-
-    setSummary,
-
-    closeSummary
-
-  } = useCallStore();
+  const setSummary =
+    useCallStore(
+      (s) => s.setSummary
+    );
 
   const setActiveCall =
     useCallStore(
@@ -112,14 +101,18 @@ CallPage() {
   const [seconds, setSeconds] =
     useState(0);
 
-  const [connected, setConnected] =
-    useState(false);
+  // const [connected, setConnected] =
+  //   useState(false);
+
+  const connected =
+    activeCall?.status ===
+    "ANSWERED";
 
   useEffect(() => {
 
-    if (
-      activeCall?.callerId ===
-      user?.userId
+    if (     
+      activeCall?.status === "ANSWERED" &&
+      activeCall?.callerId === user?.userId
     ) {
 
       console.log(
@@ -151,21 +144,6 @@ CallPage() {
         );
 
       }, 1000);
-
-    // socket.on(
-
-    //   SOCKET_EVENTS
-    //     .CALL_ACCEPTED,
-
-    //   () => {
-
-    //     setConnected(true);
-
-    //   }
-
-    // );
-
-    setConnected(true);
 
     socket.on(
 
@@ -228,11 +206,6 @@ CallPage() {
 
       clearInterval(
         interval
-      );
-
-      socket.off(
-        SOCKET_EVENTS
-          .CALL_ACCEPTED
       );
 
       socket.off(
@@ -342,26 +315,6 @@ CallPage() {
         muted={muted}
         onMute={toggleMute}
         onHangup={hangup}
-      />
-
-      <CallSummaryModal
-
-        open={summaryOpen}
-
-        duration={
-          callSummary?.duration || 0
-        }
-
-        amount={
-          callSummary?.amount || 0
-        }
-
-        balance={
-          callSummary?.balance || 0
-        }
-
-        onClose={closeSummary}
-
       />
 
       <audio

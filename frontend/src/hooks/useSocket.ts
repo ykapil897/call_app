@@ -100,7 +100,9 @@ export function useSocket() {
 
         });
 
-        toast.loading("Calling...");
+        navigate(
+          `/call/${call.callId}`
+        );
 
       }
     );
@@ -159,10 +161,6 @@ export function useSocket() {
             "ANSWERED"
 
         });
-
-        navigate(
-          `/call/${data.callId}`
-        );
 
       }
 

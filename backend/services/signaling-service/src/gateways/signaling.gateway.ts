@@ -225,22 +225,22 @@ registerSignalingGateway(
                 call.status =
                   "MISSED";
 
-                await producer.publish({
+                // await producer.publish({
 
-                  event:
-                    CallEventType.CALL_MISSED,
+                //   event:
+                //     CallEventType.CALL_MISSED,
 
-                  callId,
+                //   callId,
 
-                  callerId:
-                    userId,
+                //   callerId:
+                //     userId,
 
-                  calleeId,
+                //   calleeId,
 
-                  timestamp:
-                    Date.now()
+                //   timestamp:
+                //     Date.now()
 
-                });
+                // });
 
                 io.to(
                   socket.id
@@ -288,22 +288,22 @@ registerSignalingGateway(
             }
           );
 
-          await producer.publish({
+          // await producer.publish({
 
-            event:
-              CallEventType.CALL_CREATED,
+          //   event:
+          //     CallEventType.CALL_CREATED,
 
-            callId,
+          //   callId,
 
-            callerId:
-              userId,
+          //   callerId:
+          //     userId,
 
-            calleeId,
+          //   calleeId,
 
-            timestamp:
-              Date.now()
+          //   timestamp:
+          //     Date.now()
 
-          });
+          // });
 
           io.to(
             calleeSocketId
@@ -342,23 +342,23 @@ registerSignalingGateway(
           call.answeredAt =
             Date.now();
 
-          await producer.publish({
+          // await producer.publish({
 
-            event:
-              CallEventType.CALL_ANSWERED,
+          //   event:
+          //     CallEventType.CALL_ANSWERED,
 
-            callId,
+          //   callId,
 
-            callerId:
-              call.callerId,
+          //   callerId:
+          //     call.callerId,
 
-            calleeId:
-              call.calleeId,
+          //   calleeId:
+          //     call.calleeId,
 
-            timestamp:
-              call.answeredAt
+          //   timestamp:
+          //     call.answeredAt
 
-          });
+          // });
 
           const callerSocketId =
             await presenceRepo.getSocketId(
@@ -416,23 +416,23 @@ registerSignalingGateway(
           call.status =
             "REJECTED";
 
-          await producer.publish({
+          // await producer.publish({
 
-            event:
-              CallEventType.CALL_REJECTED,
+          //   event:
+          //     CallEventType.CALL_REJECTED,
 
-            callId,
+          //   callId,
 
-            callerId:
-              call.callerId,
+          //   callerId:
+          //     call.callerId,
 
-            calleeId:
-              call.calleeId,
+          //   calleeId:
+          //     call.calleeId,
 
-            timestamp:
-              Date.now()
+          //   timestamp:
+          //     Date.now()
 
-          });
+          // });
 
           const callerSocketId =
             await presenceRepo.getSocketId(

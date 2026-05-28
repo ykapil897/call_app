@@ -22,7 +22,7 @@ getInvoice(
 
   const res =
     await api.get(
-      `/billing/invoice?callId=${callId}`
+      `/billing/getInvoice?callId=${callId}`
     );
 
   return res.data.data;

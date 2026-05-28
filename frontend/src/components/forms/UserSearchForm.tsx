@@ -21,30 +21,16 @@ import {
 import {
   useAuthStore
 } from "../../stores/auth.store";
+import toast from "react-hot-toast";
 
-import {
-  useCallStore
-} from "../../stores/call.store";
-
-import {
-  useNavigate
-} from "react-router-dom";
 
 export function UserSearchForm() {
-
-  const navigate =
-    useNavigate();
 
   const currentUser =
     useAuthStore(
       (s) => s.user
     );
 
-  const setActiveCall =
-    useCallStore(
-      (s) =>
-        s.setActiveCall
-    );
 
   const [email, setEmail] =
     useState("");
@@ -119,6 +105,10 @@ export function UserSearchForm() {
           result.userId
       }
     );
+
+    toast.success(
+      "Calling..."
+     );
 
   }
 
