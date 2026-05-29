@@ -12,7 +12,5 @@ export const kafka =
 
   });
 
-export const consumer =
-  kafka.consumer({
-    groupId: "billing-group"
-  });
+export const producer =
+  kafka.producer();

@@ -19,6 +19,10 @@ import {
   registerSignalingGateway
 } from "./gateways/signaling.gateway";
 
+import {
+  startBillingReadyConsumer
+} from "./consumers/BillingReadyConsumer";
+
 async function start() {
 
   const app =
@@ -44,6 +48,8 @@ async function start() {
   registerSignalingGateway(io);
 
   await producer.connect();
+
+  await startBillingReadyConsumer(io);
 
   httpServer.listen(
     serverConfig.port,

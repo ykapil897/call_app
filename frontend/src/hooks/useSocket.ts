@@ -24,6 +24,10 @@ import {
 import { useNavigate
 } from "react-router-dom";
 
+import {
+  getInvoice,
+  getBalance
+} from "../api/billing.api";
 
 export function useSocket() {
 
@@ -220,6 +224,64 @@ export function useSocket() {
           .setIncomingCall(
             null
           );
+
+      }
+
+    );
+
+    socket.on(
+
+      SOCKET_EVENTS
+        .BILLING_READY,
+
+      async ({
+        callId
+      }) => {
+
+        const currentUser =
+          useAuthStore
+            .getState()
+            .user;
+
+        if (!currentUser) {
+          return;
+        }
+
+        try {
+
+          const invoice =
+            await getInvoice(
+              callId
+            );
+
+          const balance =
+            await getBalance(
+              currentUser.userId
+            );
+
+          useCallStore
+            .getState()
+            .setSummary({
+
+              duration:
+                invoice.duration,
+
+              amount:
+                invoice.amount,
+
+              balance:
+                balance.balance
+
+            });
+
+        } catch (err) {
+
+          console.error(
+            "Failed to load billing summary",
+            err
+          );
+
+        }
 
       }
 

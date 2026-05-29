@@ -36,11 +36,6 @@ import {
 } from "../components/call/RingingScreen";
 
 import {
-  getInvoice,
-  getBalance
-} from "../api/billing.api";
-
-import {
   useAuthStore
 } from "../stores/auth.store";
 
@@ -59,11 +54,6 @@ CallPage() {
   const user =
     useAuthStore(
       (s) => s.user
-    );
-
-  const setSummary =
-    useCallStore(
-      (s) => s.setSummary
     );
 
   const setActiveCall =
@@ -151,52 +141,10 @@ CallPage() {
         .CALL_ENDED,
 
       async () => {
-
-        if (!activeCall || !user) {
-
-          setActiveCall(null);
-
-          navigate("/");
-
-          return;
-
-        }
-
-        const callId =
-          activeCall.callId;
-
-        const isCaller =
-          activeCall.callerId ===
-            user.userId;
-
+        
         setActiveCall(null);
 
         navigate("/");
-
-        if (isCaller) {
-
-          const invoice =
-            await getInvoice(callId);
-
-          const balance =
-            await getBalance(
-              user.userId
-            );
-
-          setSummary({
-
-            duration:
-              seconds,
-
-            amount:
-              invoice.amount,
-
-            balance:
-              balance.balance
-
-          });
-
-        }
 
       }
 
@@ -226,10 +174,6 @@ CallPage() {
     const callId =
       activeCall.callId;
 
-    const isCaller =
-      activeCall.callerId ===
-        user.userId;
-
     socket.emit(
       SOCKET_EVENTS.CALL_ENDED,
       { callId }
@@ -238,24 +182,6 @@ CallPage() {
     setActiveCall(null);
 
     navigate("/");
-
-    if (isCaller) {
-
-      const invoice =
-        await getInvoice(callId);
-
-      const balance =
-        await getBalance(
-          user.userId
-        );
-
-      setSummary({
-        duration: seconds,
-        amount: invoice.amount,
-        balance: balance.balance
-      });
-
-    }
 
   }
 

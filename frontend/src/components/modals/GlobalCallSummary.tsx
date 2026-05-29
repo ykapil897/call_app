@@ -1,5 +1,3 @@
-// components/modals/GlobalCallSummary.tsx
-
 import {
   useCallStore
 } from "../../stores/call.store";
